@@ -70,7 +70,7 @@ sudo docker network create conjur
 sudo docker container run -d --name $master_name --network conjur --restart=always --security-opt=seccomp:unconfined -p 443:443 -p 5432:5432 -p 1999:1999 $conjur_image
 
 #creates company namespace and configures conjur for secrets storage
-sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password Cyberark1 $company_name
+sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name
 
 #configure conjur policy and load variables
 configure_conjur
@@ -87,7 +87,7 @@ sudo docker cp policy/ conjur-cli:/
 sudo docker exec -i conjur-cli conjur init --account $company_name --url https://$master_name <<< yes
 
 #Login to conjur and load policy
-sudo docker exec conjur-cli conjur authn login -u admin -p Cyberark1
+sudo docker exec conjur-cli conjur authn login -u admin -p $admin_password
 sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml
 sudo docker exec conjur-cli conjur policy load apps /policy/apps.yml
 sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml
