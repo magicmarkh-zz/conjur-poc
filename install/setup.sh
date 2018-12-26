@@ -1,13 +1,24 @@
 #Conjur POC Install - Master install and base policies
-#Please vet the commands ran before running this script in your environment
+#Please verify the commands ran before running this script in your environment
 
-#Load ini variables
-source <(grep = config.ini)
+checkOS(){
+  printf '\n-----'
+  printf '\nInstalling dependencies'
+  if [[ $(cat /etc/*-release | grep -w ID_LIKE) == 'ID_LIKE="rhel fedora"' ]]; then
+    install_yum
+  elif [[ $(cat /etc/*-release | grep -w ID_LIKE) == 'ID_LIKE=debian' ]]; then
+    install_apt
+  else
+    printf "\nCouldn't figure out OS"
+  fi
+  printf '\n-----\n'
+}
 
-#Update CentOS
+install_yum(){
+#Update OS
 sudo yum update -y
 
-#install Docker
+#install Docker CE
 sudo yum install yum-utils device-mapper-persistent-data lvm2 -y
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 sudo yum install docker-ce -y
@@ -15,6 +26,37 @@ sudo yum install docker-ce -y
 #config docker to start automatically and start the service
 sudo systemctl start docker
 sudo systemctl enable /usr/lib/systemd/system/docker.service
+
+#initiate conjur install
+install_conjur
+}
+
+install_apt(){
+#update OS
+sudo apt-get upgrade -y
+
+#Install packages to allow apt to use a repository over HTTPS:
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common -y
+
+#Add Docker’s official GPG key:
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+#Set up stable docker repository
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+#Install latest version of docker-ce
+sudo apt-get install docker-ce -y
+
+#initiate conjur install
+install_conjur
+}
+
+install_conjur(){
+#Load ini variables
+source <(grep = config.ini)
 
 #Load the Conjur container. Place conjur-appliance-version.tar.gz in the same folder as this script
 tarname=$(find conjur-app*)
@@ -27,9 +69,14 @@ sudo docker network create conjur
 #start docker master container named "conjur-master"
 sudo docker container run -d --name $master_name --network conjur --restart=always --security-opt=seccomp:unconfined -p 443:443 -p 5432:5432 -p 1999:1999 $conjur_image
 
-#creates tiaa namespace and configures conjur for secrets storage
+#creates company namespace and configures conjur for secrets storage
 sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password Cyberark1 $company_name
 
+#configure conjur policy and load variables
+configure_conjur
+}
+
+configure_conjur(){
 #create CLI container
 sudo docker container run -d --name conjur-cli --network conjur --entrypoint "" cyberark/conjur-cli:5 sleep infinity
 
@@ -57,3 +104,6 @@ sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables
 sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/puppet_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
 sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/chef_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
 sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/jenkins_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+}
+
+checkOS
