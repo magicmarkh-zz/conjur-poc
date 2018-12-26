@@ -4,7 +4,7 @@ Script is intended to install CyberArk Conjur Enterprise Edition with generic po
 
 ## Requirements
 
-1. Supported OS (listed below) with root level access
+1. Supported OS (listed below) with sudo ability
 2. Internet connectivity
 
 ## How To Use
