@@ -1,0 +1,22 @@
+- !policy
+  id: ci
+  body:
+    - !layer
+
+    - !host-factory
+      layers: [ !layer ]
+
+- !policy
+  id: cd
+  body:
+    - !layer
+
+    - !host-factory
+      layers: [ !layer ]
+
+- !policy
+  id: secrets
+
+- !group ci
+
+- !group cd

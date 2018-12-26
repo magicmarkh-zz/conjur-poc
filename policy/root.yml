@@ -1,0 +1,18 @@
+---
+- !user mark
+
+- !user darren
+
+- !group admins
+
+- !group auditors
+
+- !grant
+  role: !group admins
+  members: 
+    - !user mark
+    - !user darren
+
+- !policy
+  id: apps
+  owner: !group admins
