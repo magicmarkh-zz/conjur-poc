@@ -15,7 +15,7 @@ Script is intended to install CyberArk Conjur Enterprise Edition with generic po
 4. chmod 755 setup.sh
 5. run ./setup.sh
 
-## Supported Operating Systems
+## Tested Operating Systems
 
 - CentOS 7.x
-- RHEL 7.x
+- Ubuntu 18.x
