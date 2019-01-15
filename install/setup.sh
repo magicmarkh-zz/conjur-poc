@@ -87,12 +87,12 @@ while : ; do
   fi
 done
 
+#Load ini variables
+source <(grep = config.ini)
+
 #Updating cli-retrieve script based on config.ini
 sed -i "s+acme+$company_name+g" $PWD/policy/cli-retrieve-password.sh
 sed -i "s+conjur-master+$master_name+g" $PWD/policy/cli-retrieve-password.sh
-
-#Load ini variables
-source <(grep = config.ini)
 
 #Load the Conjur container. Place conjur-appliance-version.tar.gz in the same folder as this script
 tarname=$(find conjur-app*)
