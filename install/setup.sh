@@ -55,6 +55,38 @@ install_conjur
 }
 
 install_conjur(){
+#Gather Company Name
+local done=0
+while : ; do
+  read -p 'Please enter your company name: ' compvar
+  printf  "%s\n" "You entered $compvar, is this correct (Yes or No)?"
+  select yn in "Yes" "No"; do
+    case $yn in
+      Yes ) local done=1; sed -i "s+company_name=.*+company_name=$compvar+g" config.ini; break;;
+      No ) echo ""; break;;
+    esac
+  done
+  if [[ "$done" -ne 0 ]]; then
+    break
+  fi
+done
+
+#Gather Hostname
+local done=0
+while : ; do
+  read -p 'Please enter fully qualified domain name or hostname: ' hostvar
+  printf "%s\n" "You entered $hostvar, is this correct (Yes or No)?"
+  select yn in "Yes" "No"; do
+    case $yn in
+      Yes ) local done=1; sed -i "s+master_name=.*+master_name=$hostvar+g" config.ini; break;;
+      No ) echo ""; break;;
+    esac
+  done
+  if [[ "$done" -ne 0 ]]; then
+    break
+  fi
+done
+
 #Load ini variables
 source <(grep = config.ini)
 
@@ -92,8 +124,11 @@ sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml
 sudo docker exec conjur-cli conjur policy load apps /policy/apps.yml
 sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml
 
-#set values for passwords in secrets policy
+#Updating cli-retrieve script based on config.ini
+sed -i "s+acme+$company_name+g" $PWD/policy/cli-retrieve-password.sh
+sed -i "s+conjur-master+$master_name+g" $PWD/policy/cli-retrieve-password.sh
 
+#set values for passwords in secrets policy
 sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/ansible_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
 sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/electric_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
 sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/openshift_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
