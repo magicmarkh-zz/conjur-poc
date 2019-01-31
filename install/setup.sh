@@ -80,6 +80,10 @@ configure_conjur(){
 #create CLI container
 sudo docker container run -d --name conjur-cli --network conjur --entrypoint "" cyberark/conjur-cli:5 sleep infinity
 
+#set the company name in the cli-retrieve-password.sh script
+sed -i "s/master_name=.*/master_name=$master_name/g" policy/cli-retrieve-password.sh
+sed -i "s/company_name=.*/company_name=$company_name/g" policy/cli-retrieve-password.sh
+
 #copy policy into container 
 sudo docker cp policy/ conjur-cli:/
 
