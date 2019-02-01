@@ -12,7 +12,7 @@ Script is intended to install CyberArk Conjur Enterprise Edition with generic po
 1. Clone this repository
 2. Obtain a copy of conjur enterprise from your CyberArk Account Executive and place it in the install folder
 3. Update the config.ini file values as necessary.
-4. chmod 755 setup.sh
+4. chmod +x setup.sh
 5. run ./setup.sh
 
 ## Tested Operating Systems
