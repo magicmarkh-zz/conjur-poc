@@ -1,4 +1,4 @@
-#Conjur POC Install - Master install and base policies
+#Conjur POC Install - Master install and base policies 
 #Please verify the commands ran before running this script in your environment
 
 checkOS(){

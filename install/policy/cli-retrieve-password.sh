@@ -1,3 +1,4 @@
+#sample script to retrieve credential from conjur
 main(){
   printf '\n-----'
   printf '\nThis Script will pull a secret via REST.'
