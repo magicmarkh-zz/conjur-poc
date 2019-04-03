@@ -162,7 +162,12 @@ while : ; do
 done
 
 #Load ini variables
-source $PWD/config.ini >> ${me}.log
+local master_name=$(cat $PWD/config.ini | awk '/master_name=/')
+local master_name=$(echo ${master_name#*=})
+local company_name=$(cat $PWD/config.ini | awk '/company_name=/')
+local company_name=$(echo ${company_name#*=})
+local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/')
+local admin_password=$(echo ${admin_password#*=})
 
 #Updating cli-retrieve script based on config.ini
 print_info "Updating scripts based on user input"
@@ -206,6 +211,12 @@ configure_conjur
 configure_conjur(){
 #create CLI container
 print_head "Configuring Conjur via Conjur CLI"
+local master_name=$(cat $PWD/config.ini | awk '/master_name=/')
+local master_name=$(echo ${master_name#*=})
+local company_name=$(cat $PWD/config.ini | awk '/company_name=/')
+local company_name=$(echo ${company_name#*=})
+local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/')
+local admin_password=$(echo ${admin_password#*=})
 print_info "Creating Conjur CLI Container - this may take a while"
 sh -c 'sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint "" cyberark/conjur-cli:5 sleep infinity' >> ${me}.log
 if [[ "$(docker ps -q -f name=conjur-cli)" ]]; then
@@ -221,14 +232,14 @@ sudo docker cp policy/ conjur-cli:/
 
 #Init conjur session from CLI container
 print_info "Initializing Conjur"
-sudo docker exec -i conjur-cli conjur init --account $company_name --url https://$master_name <<< yes >> ${me}.log
+sudo docker exec -i conjur-cli conjur init --account $company_name --url https://$master_name <<< yes
 
 #Login to conjur and load policy
 print_info "Loading Conjur policy"
-sh -c 'sudo docker exec conjur-cli conjur authn login -u admin -p $admin_password' >> ${me}.log
-sh -c 'sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml' >> ${me}.log
-sh -c 'sudo docker exec conjur-cli conjur policy load apps /policy/apps.yml' >> ${me}.log
-sh -c 'sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml' >> ${me}.log
+sudo docker exec conjur-cli conjur authn login -u admin -p $admin_password >> ${me}.log
+sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml >> ${me}.log
+sudo docker exec conjur-cli conjur policy load apps /policy/apps.yml >> ${me}.log
+sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml >> ${me}.log
 
 #set values for passwords in secrets policy
 print_info "Creating Conjur secrets"
