@@ -162,7 +162,7 @@ while : ; do
 done
 
 #Load ini variables
-source <(grep = config.ini)
+source $PWD/config.ini >> ${me}.log
 
 #Updating cli-retrieve script based on config.ini
 print_info "Updating scripts based on user input"
