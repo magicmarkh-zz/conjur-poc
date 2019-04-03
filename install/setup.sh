@@ -162,12 +162,9 @@ while : ; do
 done
 
 #Load ini variables
-local master_name=$(cat $PWD/config.ini | awk '/master_name=/')
-local master_name=$(echo ${master_name#*=})
-local company_name=$(cat $PWD/config.ini | awk '/company_name=/')
-local company_name=$(echo ${company_name#*=})
-local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/')
-local admin_password=$(echo ${admin_password#*=})
+local master_name=$(cat $PWD/config.ini | awk '/master_name=/' | sed 's/master_name=//')
+local company_name=$(cat $PWD/config.ini | awk '/company_name=/' | sed 's/company_name=//')
+local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/' | sed 's/admin_password//')
 
 #Updating cli-retrieve script based on config.ini
 print_info "Updating scripts based on user input"
@@ -211,12 +208,9 @@ configure_conjur
 configure_conjur(){
 #create CLI container
 print_head "Configuring Conjur via Conjur CLI"
-local master_name=$(cat $PWD/config.ini | awk '/master_name=/')
-local master_name=$(echo ${master_name#*=})
-local company_name=$(cat $PWD/config.ini | awk '/company_name=/')
-local company_name=$(echo ${company_name#*=})
-local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/')
-local admin_password=$(echo ${admin_password#*=})
+local master_name=$(cat $PWD/config.ini | awk '/master_name=/' | sed 's/master_name=//')
+local company_name=$(cat $PWD/config.ini | awk '/company_name=/' | sed 's/company_name=//')
+local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/' | sed 's/admin_password//')
 print_info "Creating Conjur CLI Container - this may take a while"
 sh -c 'sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint "" cyberark/conjur-cli:5 sleep infinity' >> ${me}.log
 if [[ "$(docker ps -q -f name=conjur-cli)" ]]; then
