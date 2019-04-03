@@ -82,7 +82,7 @@ done
 print_success "Required packages installed."
 
 print_info "Adding Docker Repo"
-sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo >> ${me}.log 2>&1
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo >> ${me}.log 
 
 print_info "Installing Docker"
 sudo yum -y install docker-ce >> ${me}.log
@@ -207,7 +207,7 @@ configure_conjur(){
 #create CLI container
 print_head "Configuring Conjur via Conjur CLI"
 print_info "Creating Conjur CLI Container - this may take a while"
-sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint "" cyberark/conjur-cli:5 sleep infinity >> ${me}.log
+sh -c 'sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint "" cyberark/conjur-cli:5 sleep infinity' >> ${me}.log
 if [[ "$(docker ps -q -f name=conjur-cli)" ]]; then
   print_success "Conjur CLI container is running"
 else
@@ -225,10 +225,10 @@ sudo docker exec -i conjur-cli conjur init --account $company_name --url https:/
 
 #Login to conjur and load policy
 print_info "Loading Conjur policy"
-sudo docker exec conjur-cli conjur authn login -u admin -p $admin_password >> ${me}.log
-sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml >> ${me}.log
-sudo docker exec conjur-cli conjur policy load apps /policy/apps.yml >> ${me}.log
-sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml >> ${me}.log
+sh -c 'sudo docker exec conjur-cli conjur authn login -u admin -p $admin_password' >> ${me}.log
+sh -c 'sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml' >> ${me}.log
+sh -c 'sudo docker exec conjur-cli conjur policy load apps /policy/apps.yml' >> ${me}.log
+sh -c 'sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml' >> ${me}.log
 
 #set values for passwords in secrets policy
 print_info "Creating Conjur secrets"
