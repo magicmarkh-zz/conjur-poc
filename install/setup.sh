@@ -59,8 +59,7 @@ sudo yum update -y >> ${me}.log
 
 #install Docker CE
 print_info "Installing pre-requisite packages - this may take some time"
-sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo >> ${me}.log 2>&1
-pkgarray=(yum-utils device-mapper-persistent-data lvm2 curl docker-ce)
+pkgarray=(yum-utils device-mapper-persistent-data lvm2)
 for pkg in ${pkgarray[]}
 do
   pkg="$pkg"
@@ -81,6 +80,19 @@ do
   fi
 done
 print_success "Required packages installed."
+
+print_info "Adding Docker Repo"
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo >> ${me}.log 2>&1
+
+print_info "Installing Docker"
+sudo yum -y install docker-ce
+sudo yum list docker-ce > /dev/null
+if [[ $? -eq 0 ]]; then
+  print_success "docker-ce installed"
+else
+  print_error "docer-ce could not be installed. Exiting..."
+  exit 1
+fi
 
 #config docker to start automatically and start the service
 print_info "Enabling Docker"
