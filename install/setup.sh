@@ -212,7 +212,7 @@ local master_name=$(cat $PWD/config.ini | awk '/master_name=/' | sed 's/master_n
 local company_name=$(cat $PWD/config.ini | awk '/company_name=/' | sed 's/company_name=//')
 local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/' | sed 's/admin_password//')
 print_info "Creating Conjur CLI Container - this may take a while"
-sh -c 'sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint "" cyberark/conjur-cli:5 sleep infinity' >> ${me}.log
+sh -c 'sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint '' cyberark/conjur-cli:5 sleep infinity' >> ${me}.log
 if [[ "$(docker ps -q -f name=conjur-cli)" ]]; then
   print_success "Conjur CLI container is running"
 else
