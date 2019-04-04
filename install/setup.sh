@@ -67,7 +67,7 @@ do
   if [[ $? -eq 0 ]]; then 
     print_info "Installing $pkg"
     sudo yum -y install $pkg >> ${me}.log
-    sudo yum list $pkg > /dev/null
+    sudo yum list installed $pkg > /dev/null
     if [[ $? -eq 0 ]]; then
       print_success "$pkg installed"
     else
@@ -86,11 +86,11 @@ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/dock
 
 print_info "Installing Docker"
 sudo yum -y install docker-ce >> ${me}.log
-sudo yum list docker-ce > /dev/null
+sudo yum list installed docker-ce > /dev/null
 if [[ $? -eq 0 ]]; then
   print_success "docker-ce installed"
 else
-  print_error "docer-ce could not be installed. Exiting..."
+  print_error "docker-ce could not be installed. Exiting..."
   exit 1
 fi
 
