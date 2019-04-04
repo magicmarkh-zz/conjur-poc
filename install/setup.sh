@@ -39,7 +39,7 @@ checkOS(){
 print_head "Verifying OS"
 touch ${me}.log
 echo "Log file generated on $(date)" >> ${me}.log
-case "" in
+case "$(cat /etc/*-release | grep -w ID_LIKE)" in
   'ID_LIKE="rhel fedora"' )
     print_success "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')"
     install_yum $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')
@@ -52,6 +52,7 @@ case "" in
     print_success "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')"
     install_apt $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')
     ;;
+esac
 }
 
 install_yum(){
