@@ -193,7 +193,7 @@ sudo docker container run -d --name $master_name --network conjur --restart=alwa
 
 #creates company namespace and configures conjur for secrets storage
 print_info "Configuring Conjur based on user inputs - this may take a while"
-sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name
+sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name 2>&1 | tee ${me}.log
 if [[ "$(tail -n 1 ${me}.log)" == "Configuration successful. Conjur master up and running." ]]; then
   print_success "$(tail -n 1 ${me}.log)"
 else
@@ -212,7 +212,7 @@ local master_name=$(cat $PWD/config.ini | awk '/master_name=/' | sed 's/master_n
 local company_name=$(cat $PWD/config.ini | awk '/company_name=/' | sed 's/company_name=//')
 local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/' | sed 's/admin_password//')
 print_info "Creating Conjur CLI Container - this may take a while"
-sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint '' cyberark/conjur-cli:5 sleep infinity >> ${me}.log
+sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint '' cyberark/conjur-cli:5 sleep infinity
 if [[ "$(docker ps -q -f name=conjur-cli)" ]]; then
   print_success "Conjur CLI container is running"
 else
