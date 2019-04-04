@@ -193,13 +193,21 @@ sudo docker container run -d --name $master_name --network conjur --restart=alwa
 
 #creates company namespace and configures conjur for secrets storage
 print_info "Configuring Conjur based on user inputs - this may take a while"
-sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name 2>&1 | tee ${me}.log
-if [[ "$(tail -n 1 ${me}.log)" == "Configuration successful. Conjur master up and running." ]]; then
-  print_success "$(tail -n 1 ${me}.log)"
+sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name
+#if [[ "$(tail -n 1 ${me}.log)" == "Configuration successful. Conjur master up and running." ]]; then
+#  print_success "$(tail -n 1 ${me}.log)"
+#else
+#  print_error "Conjur install failed. Review ${me}.log for more info. Exiting..."
+#  exit 1
+#fi
+
+if [[ "$(docker ps -q -f name=$mastername)" ]]; then
+  print_success "Conjur container is running"
 else
-  print_error "Conjur install failed. Review ${me}.log for more info. Exiting..."
+  print_error "Conjur is not running. Review ${me}.log for more info. Exiting..."
   exit 1
 fi
+
 
 #configure conjur policy and load variables
 configure_conjur
@@ -226,7 +234,7 @@ sudo docker cp policy/ conjur-cli:/
 
 #Init conjur session from CLI container
 print_info "Initializing Conjur"
-sudo docker exec -i conjur-cli conjur init --account $company_name --url https://$master_name
+sudo docker exec -i conjur-cli conjur init --account $company_name --url https://$master_name <<< yes
 
 #Login to conjur and load policy
 print_head "Loading Conjur policy"
