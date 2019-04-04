@@ -189,11 +189,11 @@ sudo docker network create conjur >> ${me}.log
 
 #start docker master container named "conjur-master"
 print_info "Creating Conjur container. Container name will be $master_name"
-sudo docker container run -d --name $master_name --network conjur --restart=always --security-opt=seccomp:unconfined -p 443:443 -p 5432:5432 -p 1999:1999 $conjur_image >> ${me}.log
+sudo docker container run -d --name $master_name --network conjur --restart=always --security-opt=seccomp:unconfined -p 443:443 -p 5432:5432 -p 1999:1999 $conjur_image
 
 #creates company namespace and configures conjur for secrets storage
 print_info "Configuring Conjur based on user inputs - this may take a while"
-sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name >> ${me}.log
+sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name
 if [[ "$(tail -n 1 ${me}.log)" == "Configuration successful. Conjur master up and running." ]]; then
   print_success "$(tail -n 1 ${me}.log)"
 else
@@ -212,7 +212,7 @@ local master_name=$(cat $PWD/config.ini | awk '/master_name=/' | sed 's/master_n
 local company_name=$(cat $PWD/config.ini | awk '/company_name=/' | sed 's/company_name=//')
 local admin_password=$(cat $PWD/config.ini | awk '/admin_password=/' | sed 's/admin_password//')
 print_info "Creating Conjur CLI Container - this may take a while"
-sh -c 'sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint '' cyberark/conjur-cli:5 sleep infinity' >> ${me}.log
+sudo docker container run -d --name conjur-cli --network conjur --restart=always --entrypoint '' cyberark/conjur-cli:5 sleep infinity >> ${me}.log
 if [[ "$(docker ps -q -f name=conjur-cli)" ]]; then
   print_success "Conjur CLI container is running"
 else
@@ -226,27 +226,27 @@ sudo docker cp policy/ conjur-cli:/
 
 #Init conjur session from CLI container
 print_info "Initializing Conjur"
-sudo docker exec -i conjur-cli conjur init --account $company_name --url https://$master_name <<< yes
+sudo docker exec -i conjur-cli conjur init --account $company_name --url https://$master_name
 
 #Login to conjur and load policy
-print_info "Loading Conjur policy"
-sudo docker exec conjur-cli conjur authn login -u admin -p $admin_password >> ${me}.log
-sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml >> ${me}.log
+print_head "Loading Conjur policy"
+sudo docker exec conjur-cli conjur authn login -u admin -p $admin_password
+sudo docker exec conjur-cli conjur policy load --replace root /policy/root.yml
 sudo docker exec conjur-cli conjur policy load apps /policy/apps.yml >> ${me}.log
-sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml >> ${me}.log
+sudo docker exec conjur-cli conjur policy load apps/secrets /policy/secrets.yml
 
 #set values for passwords in secrets policy
-print_info "Creating Conjur secrets"
-sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/ansible_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/electric_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/openshift_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/docker_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/aws_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/azure_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/kubernetes_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/puppet_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/chef_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
-sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/jenkins_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32) >> ${me}.log
+print_head "Creating Conjur secrets"
+sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/ansible_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/electric_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/openshift_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/docker_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/aws_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/azure_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/cd-variables/kubernetes_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/puppet_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/chef_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
+sudo docker exec conjur-cli conjur variable values add apps/secrets/ci-variables/jenkins_secret $(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
 }
 
 checkOS
