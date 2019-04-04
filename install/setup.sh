@@ -39,21 +39,26 @@ checkOS(){
 print_head "Verifying OS"
 touch ${me}.log
 echo "Log file generated on $(date)" >> ${me}.log
-if [[ $(cat /etc/*-release | grep -w ID_LIKE) == 'ID_LIKE="rhel fedora"' ]]; then
-  print_success "CentOS found"
-  install_yum
-elif [[ $(cat /etc/*-release | grep -w ID_LIKE) == 'ID_LIKE=debian' ]]; then
-  print_success "Ubuntu found"
-  install_apt
-else
-  print_error "Couldn't figure out OS"
-fi
+case "" in
+  'ID_LIKE="rhel fedora"' )
+    print_success "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')"
+    install_yum $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')
+    ;;
+  'ID_LIKE="fedora"' )
+    print_success "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')"
+    install_yum $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')
+    ;;
+  'ID_LIKE=debian' )
+    print_success "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')"
+    install_apt $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')
+    ;;
 }
 
 install_yum(){
-print_head "Installing required packages for CentOS"
+print_head "Installing required packages for $1"
 
 #Update OS
+print_info "Installing dependencies via yum"
 print_info "Installing updates - this may take some time"
 sudo yum update -y >> ${me}.log
 
@@ -104,6 +109,8 @@ install_conjur
 }
 
 install_apt(){
+print_head "Installing required packages for $1"
+print_info "Installing dependencies via apt"
 #update OS
 sudo apt-get upgrade -y
 
