@@ -3,6 +3,8 @@
 
 - !user darren
 
+- !user amy
+
 - !group admins
 
 - !group auditors
@@ -12,6 +14,11 @@
   members: 
     - !user mark
     - !user darren
+
+- !grant
+  role: !group auditors
+  members:
+    - !user amy
 
 - !policy
   id: apps

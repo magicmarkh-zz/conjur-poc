@@ -4,13 +4,23 @@
 checkOS(){
   printf '\n-----'
   printf '\nInstalling dependencies'
-  if [[ $(cat /etc/*-release | grep -w ID_LIKE) == 'ID_LIKE="rhel fedora"' ]]; then
-    install_yum
-  elif [[ $(cat /etc/*-release | grep -w ID_LIKE) == 'ID_LIKE=debian' ]]; then
-    install_apt
-  else
-    printf "\nCouldn't figure out OS"
-  fi
+  case "$(cat /etc/*-release | grep -w ID_LIKE)" in
+    'ID_LIKE="rhel fedora"' )
+         printf "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')\n"
+         printf "Installing updates using yum\n"
+         install_yum
+         ;;
+    'ID_LIKE="fedora"' )
+         printf "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')\n"
+         printf "Installing updates using yum\n"
+         install_yum
+         ;;
+    'ID_LIKE=debian' )
+         printf "OS is $(cat /etc/*-release | grep -w PRETTY_NAME | sed 's/PRETTY_NAME=//')\n"
+         printf "Installing updates using apt-get\n"
+         install_apt
+         ;;
+esac
   printf '\n-----\n'
 }
 
