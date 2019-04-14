@@ -1,3 +1,9 @@
+---
+- !policy
+  id: hosts
+  body:
+    - !host jenkins
+
 - !policy
   id: ci
   body:
@@ -5,6 +11,10 @@
 
     - !host-factory
       layers: [ !layer ]
+
+    - !grant
+      role: !layer
+      member: !host /apps/hosts/jenkins
 
 - !policy
   id: cd
