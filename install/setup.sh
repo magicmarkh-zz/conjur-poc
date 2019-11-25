@@ -80,7 +80,7 @@ sudo docker network create conjur
 sudo docker container run -d --name $master_name --network conjur --restart=always --security-opt=seccomp:unconfined -p 443:443 -p 5432:5432 -p 1999:1999 $conjur_image
 
 #creates company namespace and configures conjur for secrets storage
-sudo docker exec $master_name evoke configure master --hostname $master_name --admin-password $admin_password $company_name
+sudo docker exec $master_name evoke configure master --accept-eula --hostname $master_name --admin-password $admin_password $company_name
 
 #configure conjur policy and load variables
 configure_conjur
